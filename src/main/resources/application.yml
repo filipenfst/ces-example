@@ -1,0 +1,81 @@
+micronaut:
+  application:
+    name: cesMicronautExample
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        step: PT1M
+        descriptions: true
+    binders:
+      jvm:
+        enabled: true
+
+netty:
+  default:
+    allocator:
+      max-order: 3
+
+tracing:
+  zipkin:
+    enabled: true
+
+jackson:
+  date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+
+flyway:
+  enabled: true
+  datasources:
+    default:
+      enabled: true
+      driverClassName: org.postgresql.Driver
+      dialect: POSTGRES
+      url: jdbc:postgresql://postgres:5432/ces-example
+      username: root
+      password: root
+
+r2dbc:
+  datasources:
+    default:
+      options:
+        driver: pool
+        protocol: postgres
+        maxSize: 100
+        initialSize: 5
+      url: r2dbc:postgresql://postgres:5432/ces-example
+      username: root
+      password: root
+
+endpoints:
+  prometheus:
+    sensitive: false
+
+client:
+  user-api:
+      base-url: http://localhost:8080
+
+resilience4j:
+  circuitbreaker:
+    enabled: true
+    instances:
+      user-api:
+        baseConfig: default
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 2
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: TIME_BASED
+        minimumNumberOfCalls: 2
+        waitDurationInOpenState: 1s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
