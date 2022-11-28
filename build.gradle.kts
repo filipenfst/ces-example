@@ -21,7 +21,7 @@ repositories {
 val testcontainersVersion = "1.17.6"
 val resilience4jVersion = "2.0.0"
 val coroutinesVersion = "1.6.4"
-val jacksonVersion = "2.13.4"
+val jacksonVersion = "2.14.0"
 val wiremockVersion = "2.35.0"
 val mockkVersion = "1.13.2"
 val postgresqlVersion = "42.5.0"
@@ -46,6 +46,7 @@ dependencies {
     implementation("io.micronaut.flyway:micronaut-flyway")
 
     implementation("io.micronaut.serde:micronaut-serde-jackson")
+//    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     implementation("io.micronaut.tracing:micronaut-tracing-zipkin")
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
@@ -84,14 +85,6 @@ dependencies {
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
-//configurations.all {
-//    if (name != "testResourcesService") {
-//        resolutionStrategy.dependencySubstitution {
-//            substitute(module("io.micronaut:micronaut-jackson-databind"))
-//                .using(module("io.micronaut.serde:micronaut-serde-jackson:1.3.2"))
-//        }
-//    }
-//}
 
 micronaut {
     runtime("netty")
@@ -177,7 +170,7 @@ tasks.withType<JacocoCoverageVerification> {
         rule {
             limit {
                 counter = "INSTRUCTION"
-                minimum = "0.98".toBigDecimal()
+                minimum = "0.99".toBigDecimal()
             }
         }
         rule {
@@ -189,13 +182,13 @@ tasks.withType<JacocoCoverageVerification> {
         rule {
             limit {
                 counter = "BRANCH"
-                minimum = "0.93".toBigDecimal()
+                minimum = "1.00".toBigDecimal()
             }
         }
         rule {
             limit {
                 counter = "METHOD"
-                minimum = "0.98".toBigDecimal()
+                minimum = "1.00".toBigDecimal()
             }
         }
         rule {

@@ -1,5 +1,6 @@
 package com.global.payment.application.resource.subscription
 
+import com.global.payment.commons.logger.logError
 import com.global.payment.usecase.CheckUserAppAccessUseCase
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -17,8 +18,12 @@ open class SubscriptionController(
         @PathVariable userId: UUID,
         @QueryValue @NotBlank appId: String
     ): SubscriptionStatusResponse {
-        return SubscriptionStatusResponse(
-            isSubscribed = checkUserAppAccessUseCase.execute(userId, appId)
-        )
+        return kotlin.runCatching {
+            SubscriptionStatusResponse(
+                isSubscribed = checkUserAppAccessUseCase.execute(userId, appId)
+            )
+        }.onFailure {
+            logError("Error request", ex = it)
+        }.getOrThrow()
     }
 }
