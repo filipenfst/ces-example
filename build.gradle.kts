@@ -29,6 +29,7 @@ val ktlint by configurations.creating
 
 dependencies {
     kapt("io.micronaut.data:micronaut-data-processor")
+    kapt("io.micronaut:micronaut-inject-java")
     kapt("io.micronaut:micronaut-http-validation")
     kapt("io.micronaut.openapi:micronaut-openapi")
     kapt("io.micronaut:micronaut-management")
@@ -46,7 +47,6 @@ dependencies {
     implementation("io.micronaut.flyway:micronaut-flyway")
 
     implementation("io.micronaut.serde:micronaut-serde-jackson")
-//    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     implementation("io.micronaut.tracing:micronaut-tracing-zipkin")
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
