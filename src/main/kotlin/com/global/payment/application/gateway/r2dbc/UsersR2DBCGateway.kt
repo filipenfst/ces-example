@@ -8,28 +8,28 @@ import com.global.payment.domain.user.services.UserAppAccessPort
 import com.global.payment.domain.user.services.UserFinderPort
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
 import java.util.UUID
+import javax.transaction.Transactional
 
 @Singleton
-class UsersR2DBCGateway(
+open class UsersR2DBCGateway(
     private val userRepository: UserRepository
 ) : UserAppAccessPort, UserFinderPort {
 
-    fun listUsersForMerchantByMid(mid: String): Flow<User> {
-        return userRepository.findByMID(mid = mid).toDomain()
+    @Transactional
+    open fun listUsersForMerchantByMid(mid: String): Flow<User> {
+        return userRepository.findAllByMID(mid = mid).toDomain()
     }
 
     override suspend fun hasAccessToApp(userId: UUID, applicationId: String): Boolean {
-        return userRepository.hasAccess(userId = userId, applicationId = applicationId).awaitSingle()
+        return userRepository.hasAccess(userId = userId, applicationId = applicationId)
     }
 
     override suspend fun findUser(id: UUID): User? {
-        return userRepository.findById(id).awaitFirstOrNull()?.toDomain()
+        return userRepository.findById(id)?.toDomain()
     }
 
     suspend fun save(user: User): User {
-        return userRepository.save(user.toEntity()).awaitSingle().toDomain()
+        return userRepository.save(user.toEntity()).toDomain()
     }
 }

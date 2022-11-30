@@ -59,9 +59,8 @@ dependencies {
 
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:1.4.5")
     implementation("org.slf4j:slf4j-simple")
     implementation("org.slf4j:slf4j-api")
@@ -69,7 +68,7 @@ dependencies {
     implementation("io.micronaut:micronaut-management")
 
     runtimeOnly("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
-    runtimeOnly("org.postgresql:postgresql:42.5.0")
+    runtimeOnly("org.postgresql:postgresql:42.5.1")
     runtimeOnly("io.r2dbc:r2dbc-pool")
 
     ktlint("com.pinterest:ktlint:0.47.1")

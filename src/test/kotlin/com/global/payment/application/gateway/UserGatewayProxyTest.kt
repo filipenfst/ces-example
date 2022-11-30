@@ -5,6 +5,7 @@ import com.global.payment.application.IntegrationTests
 import com.global.payment.application.commons.assertThat
 import com.global.payment.application.commons.wiremock.WireMockInitializer
 import com.global.payment.application.commons.wiremock.withJsonResponseFile
+import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.application.gateway.r2dbc.entities.AppEntity
 import com.global.payment.application.gateway.r2dbc.entities.MerchantEntity
 import com.global.payment.application.gateway.r2dbc.entities.toEntity
@@ -13,7 +14,6 @@ import com.global.payment.application.gateway.r2dbc.integration.MerchantReposito
 import com.global.payment.application.gateway.r2dbc.integration.UserRepository
 import com.global.payment.domain.user.entities.User
 import jakarta.inject.Inject
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
@@ -32,6 +32,9 @@ internal class UserGatewayProxyTest : IntegrationTests {
 
     @Inject
     private lateinit var appRepository: AppRepository
+
+    @Inject
+    private lateinit var transactionDecorator: TransactionDecorator
 
 
     private val users = (1..2).map {
@@ -56,21 +59,23 @@ internal class UserGatewayProxyTest : IntegrationTests {
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        users.forEach {
-            userRepository.save(it.toEntity()).awaitSingle()
+        transactionDecorator.withTransaction {
+            users.forEach {
+                userRepository.save(it.toEntity())
+            }
+            merchant.also {
+                merchantRepository.save(it)
+            }
+
+            userRepository.addUserToMerchant(users[1].id, merchant.id)
+
+
+            apps.forEach {
+                appRepository.save(it)
+            }
+
+            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id)
         }
-        merchant.also {
-            merchantRepository.save(it).awaitSingle()
-        }
-
-        userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
-
-
-        apps.forEach {
-            appRepository.save(it).awaitSingle()
-        }
-
-        merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
     }
 
 
@@ -88,14 +93,14 @@ internal class UserGatewayProxyTest : IntegrationTests {
                         }
                 )
         )
-
-        classUnderTest.findUser(id)
-            .assertThat().isEqualTo(
-                User(
-                    id = id,
-                    name = "Name test"
-                )
+        transactionDecorator.withTransaction {
+            classUnderTest.findUser(id)
+        }.assertThat().isEqualTo(
+            User(
+                id = id,
+                name = "Name test"
             )
+        )
     }
 
     @Test
@@ -114,7 +119,8 @@ internal class UserGatewayProxyTest : IntegrationTests {
                     )
             )
 
-            classUnderTest.findUser(id)
-                .assertThat().isNull()
+            transactionDecorator.withTransaction {
+                classUnderTest.findUser(id)
+            }.assertThat().isNull()
         }
 }

@@ -10,12 +10,11 @@ import com.global.payment.application.gateway.r2dbc.integration.MerchantReposito
 import com.global.payment.application.gateway.r2dbc.integration.UserRepository
 import com.global.payment.domain.user.entities.User
 import jakarta.inject.Inject
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class UsersR2DBCGatewayTest : IntegrationTests {
     @Inject
@@ -29,6 +28,9 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
 
     @Inject
     private lateinit var appRepository: AppRepository
+
+    @Inject
+    private lateinit var transactionDecorator: TransactionDecorator
 
 
     private val users = (1..2).map {
@@ -53,41 +55,48 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        users.forEach {
-            userRepository.save(it.toEntity()).awaitSingle()
+        transactionDecorator.withTransaction {
+            users.forEach {
+                userRepository.save(it.toEntity())
+            }
+
+            merchant.also {
+                merchantRepository.save(it)
+            }
+
+            userRepository.addUserToMerchant(users[1].id, merchant.id)
+
+            apps.forEach {
+                appRepository.save(it)
+            }
+
+            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id)
         }
-        merchant.also {
-            merchantRepository.save(it).awaitSingle()
-        }
-
-        userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
-
-
-        apps.forEach {
-            appRepository.save(it).awaitSingle()
-        }
-
-        merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
     }
 
     @Test
     fun `test list user for merchant successfully`(): Unit = runBlocking {
-        classUnderTest.listUsersForMerchantByMid(merchant.mid).assertThat {
-            hasSize(1).isEqualTo(listOf(users[1]))
+        transactionDecorator.withTransaction {
+            classUnderTest.listUsersForMerchantByMid(merchant.mid)
+                .assertThat {
+                    hasSize(1).isEqualTo(listOf(users[1]))
+                }
         }
     }
 
     @Test
     fun `test check user has access to app`(): Unit = runBlocking {
-        classUnderTest.hasAccessToApp(userId = users[1].id, applicationId = apps[1].applicationId)
-            .assertThat()
+        transactionDecorator.withTransaction {
+            classUnderTest.hasAccessToApp(userId = users[1].id, applicationId = apps[1].applicationId)
+        }.assertThat()
             .isEqualTo(true)
     }
 
     @Test
     fun `test check user does not have access to app`(): Unit = runBlocking {
-        classUnderTest.hasAccessToApp(userId = users[1].id, applicationId = apps[0].applicationId)
-            .assertThat()
+        transactionDecorator.withTransaction {
+            classUnderTest.hasAccessToApp(userId = users[1].id, applicationId = apps[0].applicationId)
+        }.assertThat()
             .isEqualTo(false)
     }
 
