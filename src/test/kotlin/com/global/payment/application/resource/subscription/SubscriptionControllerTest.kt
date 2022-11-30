@@ -1,6 +1,7 @@
 package com.global.payment.application.resource.subscription
 
 import com.global.payment.application.IntegrationTests
+import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.application.gateway.r2dbc.entities.AppEntity
 import com.global.payment.application.gateway.r2dbc.entities.MerchantEntity
 import com.global.payment.application.gateway.r2dbc.entities.toEntity
@@ -32,6 +33,9 @@ internal class SubscriptionControllerTest : IntegrationTests {
     @Inject
     private lateinit var appRepository: AppRepository
 
+    @Inject
+    private lateinit var transactionDecorator: TransactionDecorator
+
 
     private val users = (1..2).map {
         User(
@@ -55,21 +59,23 @@ internal class SubscriptionControllerTest : IntegrationTests {
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        users.forEach {
-            userRepository.save(it.toEntity()).awaitSingle()
+        transactionDecorator.withTransaction {
+            users.forEach {
+                userRepository.save(it.toEntity()).awaitSingle()
+            }
+            merchant.also {
+                merchantRepository.save(it).awaitSingle()
+            }
+
+            userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
+
+
+            apps.forEach {
+                appRepository.save(it).awaitSingle()
+            }
+
+            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
         }
-        merchant.also {
-            merchantRepository.save(it).awaitSingle()
-        }
-
-        userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
-
-
-        apps.forEach {
-            appRepository.save(it).awaitSingle()
-        }
-
-        merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.global.payment.application.IntegrationTests
 import com.global.payment.application.commons.assertThat
 import com.global.payment.application.commons.wiremock.WireMockInitializer
 import com.global.payment.application.commons.wiremock.withJsonResponseFile
+import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.application.gateway.r2dbc.entities.AppEntity
 import com.global.payment.application.gateway.r2dbc.entities.MerchantEntity
 import com.global.payment.application.gateway.r2dbc.entities.toEntity
@@ -33,6 +34,9 @@ internal class UserGatewayProxyTest : IntegrationTests {
     @Inject
     private lateinit var appRepository: AppRepository
 
+    @Inject
+    private lateinit var transactionDecorator: TransactionDecorator
+
 
     private val users = (1..2).map {
         User(
@@ -56,58 +60,36 @@ internal class UserGatewayProxyTest : IntegrationTests {
 
     @BeforeEach
     fun setup(): Unit = runBlocking {
-        users.forEach {
-            userRepository.save(it.toEntity()).awaitSingle()
+        transactionDecorator.withTransaction {
+            users.forEach {
+                userRepository.save(it.toEntity()).awaitSingle()
+            }
+            merchant.also {
+                merchantRepository.save(it).awaitSingle()
+            }
+
+            userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
+
+
+            apps.forEach {
+                appRepository.save(it).awaitSingle()
+            }
+
+            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
         }
-        merchant.also {
-            merchantRepository.save(it).awaitSingle()
-        }
-
-        userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
-
-
-        apps.forEach {
-            appRepository.save(it).awaitSingle()
-        }
-
-        merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
     }
 
 
     @Test
     fun `when user does not exist locally it should get from httpclient`(): Unit = runBlocking {
-        val id = UUID.randomUUID()
-
-        WireMockInitializer.wireMock.stubFor(
-            WireMock.get(WireMock.urlEqualTo("/user/$id"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withJsonResponseFile("userResponse.json") {
-                            set("$.id", id.toString())
-                        }
-                )
-        )
-
-        classUnderTest.findUser(id)
-            .assertThat().isEqualTo(
-                User(
-                    id = id,
-                    name = "Name test"
-                )
-            )
-    }
-
-    @Test
-    fun `when user does not exist locally it should return null when http client returns not found`(): Unit =
-        runBlocking {
+        transactionDecorator.withTransaction {
             val id = UUID.randomUUID()
 
             WireMockInitializer.wireMock.stubFor(
                 WireMock.get(WireMock.urlEqualTo("/user/$id"))
                     .willReturn(
                         WireMock.aResponse()
-                            .withStatus(404)
+                            .withStatus(200)
                             .withJsonResponseFile("userResponse.json") {
                                 set("$.id", id.toString())
                             }
@@ -115,6 +97,34 @@ internal class UserGatewayProxyTest : IntegrationTests {
             )
 
             classUnderTest.findUser(id)
-                .assertThat().isNull()
+                .assertThat().isEqualTo(
+                    User(
+                        id = id,
+                        name = "Name test"
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `when user does not exist locally it should return null when http client returns not found`(): Unit =
+        runBlocking {
+            transactionDecorator.withTransaction {
+                val id = UUID.randomUUID()
+
+                WireMockInitializer.wireMock.stubFor(
+                    WireMock.get(WireMock.urlEqualTo("/user/$id"))
+                        .willReturn(
+                            WireMock.aResponse()
+                                .withStatus(404)
+                                .withJsonResponseFile("userResponse.json") {
+                                    set("$.id", id.toString())
+                                }
+                        )
+                )
+
+                classUnderTest.findUser(id)
+                    .assertThat().isNull()
+            }
         }
 }
