@@ -9,14 +9,12 @@ import com.global.payment.domain.user.services.UserFinderPort
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
-import javax.transaction.Transactional
 
 @Singleton
 open class UsersR2DBCGateway(
     private val userRepository: UserRepository
 ) : UserAppAccessPort, UserFinderPort {
 
-    @Transactional
     open fun listUsersForMerchantByMid(mid: String): Flow<User> {
         return userRepository.findAllByMID(mid = mid).toDomain()
     }

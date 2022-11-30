@@ -10,7 +10,10 @@ import com.global.payment.application.gateway.r2dbc.integration.MerchantReposito
 import com.global.payment.application.gateway.r2dbc.integration.UserRepository
 import com.global.payment.domain.user.entities.User
 import jakarta.inject.Inject
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,8 +59,11 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
     @BeforeEach
     fun setup(): Unit = runBlocking {
         transactionDecorator.withTransaction {
+
             users.forEach {
+                printContext()
                 userRepository.save(it.toEntity())
+                printContext()
             }
 
             merchant.also {
@@ -76,11 +82,20 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
 
     @Test
     fun `test list user for merchant successfully`(): Unit = runBlocking {
-        transactionDecorator.withTransaction {
+        printContext()
+        transactionDecorator.withTransaction<String?> {
+            println("----------1--")
+            printContext()
+            println("----------1--")
             classUnderTest.listUsersForMerchantByMid(merchant.mid)
+                .asFlux()
+                .contextWrite {
+                    it
+                }.asFlow()
                 .assertThat {
                     hasSize(1).isEqualTo(listOf(users[1]))
                 }
+            null
         }
     }
 
