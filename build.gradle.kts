@@ -12,7 +12,7 @@ plugins {
 
 group = "com.global.payment"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_18
 
 repositories {
     mavenCentral()
@@ -59,7 +59,6 @@ dependencies {
 
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:1.4.5")
@@ -69,7 +68,7 @@ dependencies {
     implementation("io.micronaut:micronaut-management")
 
     runtimeOnly("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
-    runtimeOnly("org.postgresql:postgresql:42.5.0")
+    runtimeOnly("org.postgresql:postgresql:42.5.1")
     runtimeOnly("io.r2dbc:r2dbc-pool")
 
     ktlint("com.pinterest:ktlint:0.47.1")
@@ -111,7 +110,7 @@ val inputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+        jvmTarget = "18"
     }
 }
 
