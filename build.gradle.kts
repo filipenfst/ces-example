@@ -12,7 +12,7 @@ plugins {
 
 group = "com.global.payment"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_18
 
 repositories {
     mavenCentral()
@@ -59,10 +59,9 @@ dependencies {
 
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
-//    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
     implementation("ch.qos.logback:logback-classic:1.4.5")
     implementation("org.slf4j:slf4j-simple")
     implementation("org.slf4j:slf4j-api")
@@ -112,7 +111,7 @@ val inputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+        jvmTarget = "18"
     }
 }
 
