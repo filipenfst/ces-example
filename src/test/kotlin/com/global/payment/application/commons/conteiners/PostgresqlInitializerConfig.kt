@@ -5,7 +5,12 @@ import io.micronaut.data.r2dbc.operations.R2dbcOperations
 import io.r2dbc.spi.Result
 import io.r2dbc.spi.Row
 import io.r2dbc.spi.RowMetadata
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.asPublisher
 import kotlinx.coroutines.reactive.awaitSingle
@@ -36,9 +41,9 @@ internal object PostgresqlInitializerConfig : ApplicationContainerInitializerCon
         "r2dbc.datasources.default.username" to container.username,
         "r2dbc.datasources.default.password" to container.password,
 
-        "flyway.datasources.default.url" to container.jdbcUrl,
-        "flyway.datasources.default.username" to container.username,
-        "flyway.datasources.default.password" to container.password,
+        "datasources.default.url" to container.jdbcUrl,
+        "datasources.default.username" to container.username,
+        "datasources.default.password" to container.password,
     ).also {
         it.values.forEach { v -> logInfo("Postgresql----------$v") }
     }
@@ -55,7 +60,8 @@ suspend fun R2dbcOperations.resetDB() = withConnection { connection ->
         """
                 SELECT  tablename, tableowner
                 FROM pg_catalog.pg_tables
-                WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'
+                WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema' 
+                AND tablename not in ('databasechangeloglock','databasechangelog')
                 """.trimIndent()
     ).execute().mapAsFlow { t, _ ->
         t["tablename"] as String

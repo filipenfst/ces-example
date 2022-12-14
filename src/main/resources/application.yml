@@ -32,16 +32,20 @@ tracing:
 jackson:
   date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
 
-flyway:
+liquibase:
   enabled: true
   datasources:
     default:
       enabled: true
-      driverClassName: org.postgresql.Driver
-      dialect: POSTGRES
-      url: jdbc:postgresql://postgres:5432/ces-example
-      username: root
-      password: root
+      change-log: 'classpath:db/liquibase-changelog.xml'
+
+datasource:
+  driverClassName: org.postgresql.Driver
+  dialect: POSTGRES
+  url: jdbc:postgresql://postgres:5432/ces-example
+  username: root
+  password: root
+  schema-generate: NONE
 
 r2dbc:
   datasources:
@@ -54,6 +58,7 @@ r2dbc:
       url: r2dbc:postgresql://postgres:5432/ces-example
       username: root
       password: root
+      schema-generate: NONE
 
 endpoints:
   prometheus:

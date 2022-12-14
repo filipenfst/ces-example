@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.slf4j.bridge.SLF4JBridgeHandler
 import java.util.TimeZone
 
 private val initializers = setOf(
@@ -24,6 +25,8 @@ private val initializers = setOf(
 internal interface IntegrationTests : TestPropertyProvider {
     @BeforeAll
     fun setupTime() {
+        SLF4JBridgeHandler.removeHandlersForRootLogger()
+        SLF4JBridgeHandler.install()
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     }
 

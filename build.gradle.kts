@@ -12,7 +12,7 @@ plugins {
 
 group = "com.global.payment"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_18
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -44,7 +44,11 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut.kotlin:micronaut-kotlin-extension-functions")
     implementation("io.micronaut.data:micronaut-data-r2dbc")
-    implementation("io.micronaut.flyway:micronaut-flyway")
+
+
+    implementation("io.micronaut.liquibase:micronaut-liquibase")
+    implementation("org.slf4j:jul-to-slf4j:2.0.5")
+    runtimeOnly("io.micronaut.sql:micronaut-jdbc-hikari")
 
     implementation("io.micronaut.serde:micronaut-serde-jackson")
 
@@ -111,7 +115,7 @@ val inputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "18"
+        jvmTarget = "17"
     }
 }
 

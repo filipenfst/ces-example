@@ -1,3 +1,6 @@
+--liquibase formatted sql
+--changeset filipe.silva:V1__create_subscription_tables
+
 CREATE TABLE users
 (
     id   UUID PRIMARY KEY,
