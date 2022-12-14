@@ -57,6 +57,9 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-micronaut:$resilience4jVersion")
     implementation("io.github.resilience4j:resilience4j-consumer:$resilience4jVersion")
 
+    //pubsub dependency
+    implementation("io.micronaut.gcp:micronaut-gcp-pubsub")
+
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
