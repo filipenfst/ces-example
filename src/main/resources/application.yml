@@ -59,6 +59,12 @@ endpoints:
   prometheus:
     sensitive: false
 
+pubsub:
+  user:
+    topic: projects/micronaut-example-371713/topics/Micronaut-Example-Topic
+    subscriber: projects/micronaut-example-371713/subscriptions/Micronaut-Example-Subscription
+
+
 client:
   user-api:
       base-url: http://localhost:8080
