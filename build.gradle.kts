@@ -59,7 +59,7 @@ dependencies {
 
     //pubsub dependency
     implementation("io.micronaut.gcp:micronaut-gcp-pubsub")
-    implementation("io.micronaut.gcp:micronaut-gcp-common:4.6.0")
+
 
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")

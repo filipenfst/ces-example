@@ -2,6 +2,7 @@ package com.global.payment.application.config
 
 import com.global.payment.application.gateway.UserGatewayProxy
 import com.global.payment.domain.user.services.UserAppAccessPort
+import com.global.payment.domain.user.services.UserPublisherPort
 import com.global.payment.usecase.CheckUserAppAccessUseCase
 import io.micronaut.context.annotation.Factory
 import jakarta.inject.Singleton
@@ -13,8 +14,10 @@ class UseCaseFactory {
     fun checkUserAppAccessUseCase(
         userAppAccessPort: UserAppAccessPort,
         userGatewayProxy: UserGatewayProxy,
+        userPublisherPort: UserPublisherPort
     ) = CheckUserAppAccessUseCase(
         userAppAccessPort = userAppAccessPort,
-        userFinderPort = userGatewayProxy
+        userFinderPort = userGatewayProxy,
+        userPublisherPort = userPublisherPort
     )
 }
