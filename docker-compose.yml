@@ -71,3 +71,5 @@ services:
       - postgres
     environment:
       R2DBC_DATASOURCES_DEFAULT_MAXSIZE: 500
+      R2DBC_DATASOURCES_DEFAULT_URL: r2dbc:postgresql://postgres:5432/ces-example
+      DATASOURCES_DEFAULT_URL: jdbc:postgresql://postgres:5432/ces-example

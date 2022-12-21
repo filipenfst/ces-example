@@ -39,13 +39,14 @@ liquibase:
       enabled: true
       change-log: 'classpath:db/liquibase-changelog.xml'
 
-datasource:
-  driverClassName: org.postgresql.Driver
-  dialect: POSTGRES
-  url: jdbc:postgresql://postgres:5432/ces-example
-  username: root
-  password: root
-  schema-generate: NONE
+datasources:
+  default:
+    driverClassName: org.postgresql.Driver
+    dialect: POSTGRES
+    url: ${DATASOURCES_DEFAULT_URL}
+    username: root
+    password: root
+    schema-generate: NONE
 
 r2dbc:
   datasources:
@@ -55,7 +56,7 @@ r2dbc:
         protocol: postgres
         maxSize: 100
         initialSize: 5
-      url: r2dbc:postgresql://postgres:5432/ces-example
+      url: ${R2DBC_DATASOURCES_DEFAULT_URL}
       username: root
       password: root
       schema-generate: NONE

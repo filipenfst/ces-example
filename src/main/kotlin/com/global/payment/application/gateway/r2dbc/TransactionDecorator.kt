@@ -21,8 +21,5 @@ private suspend fun <T> R2dbcOperations.withSuspendingTransaction(
 ): T = withTransaction {
     mono {
         block()
-
-//    }.contextWrite {
-//        it.put("io.micronaut.tx.status.r2dbc.default",status)
     }
 }.awaitSingle()

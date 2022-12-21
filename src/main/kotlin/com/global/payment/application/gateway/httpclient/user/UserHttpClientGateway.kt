@@ -2,6 +2,7 @@ package com.global.payment.application.gateway.httpclient.user
 
 import com.global.payment.application.gateway.httpclient.config.ClientConfiguration
 import com.global.payment.application.gateway.httpclient.user.dto.UserResponse
+import com.global.payment.commons.logger.logInfo
 import com.global.payment.domain.user.entities.User
 import com.global.payment.domain.user.services.UserFinderPort
 import io.github.resilience4j.kotlin.circuitbreaker.executeSuspendFunction
@@ -19,7 +20,10 @@ class UserHttpClientGateway(
     private val userApiClient: UserApiClient,
 ) : UserFinderPort {
     override suspend fun findUser(id: UUID): User? = clientConfiguration.circuitBreaker.executeSuspendFunction {
-        userApiClient.findUser(id.toString())?.toDomain()
+        logInfo(msg = "Searching user api for user: $id")
+        userApiClient.findUser(id.toString())?.toDomain().also {
+            logInfo(msg = "User found: ${it != null}")
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package com.global.payment.application.resource.subscription
 
 import com.global.payment.application.gateway.r2dbc.TransactionDecorator
+import com.global.payment.commons.logger.logInfo
 import com.global.payment.usecase.CheckUserAppAccessUseCase
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -21,8 +22,11 @@ open class SubscriptionController(
         @PathVariable userId: UUID,
         @QueryValue @NotBlank appId: String
     ): SubscriptionStatusResponse = transactionDecorator.withTransaction {
+        logInfo(msg = "Checking subscription status for user: $userId and app $appId")
         SubscriptionStatusResponse(
             isSubscribed = checkUserAppAccessUseCase.execute(userId, appId)
-        )
+        ).also {
+            logInfo(msg = "Returning: $it")
+        }
     }
 }
