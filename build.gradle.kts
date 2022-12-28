@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "1.7.21"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.7.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.6.5"
+    id("io.micronaut.application") version "3.6.7"
     id("io.gitlab.arturbosch.detekt") version "1.21.0"
     jacoco
 }
@@ -19,7 +19,8 @@ repositories {
 }
 
 val testcontainersVersion = "1.17.6"
-val resilience4jVersion = "2.0.0"
+val micronautDataVersionVersion = "3.9.1"
+val resilience4jVersion = "2.0.2"
 val coroutinesVersion = "1.6.4"
 val jacksonVersion = "2.14.0"
 val wiremockVersion = "2.35.0"
@@ -43,7 +44,7 @@ dependencies {
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut.kotlin:micronaut-kotlin-extension-functions")
-    implementation("io.micronaut.data:micronaut-data-r2dbc")
+    implementation("io.micronaut.data:micronaut-data-r2dbc:$micronautDataVersionVersion")
 
 
     implementation("io.micronaut.liquibase:micronaut-liquibase")
@@ -53,6 +54,11 @@ dependencies {
     implementation("io.micronaut.serde:micronaut-serde-jackson")
 
     implementation("io.micronaut.tracing:micronaut-tracing-zipkin")
+    implementation("io.micronaut.tracing:micronaut-tracing-opentelemetry-http")
+    implementation("io.opentelemetry:opentelemetry-extension-kotlin")
+    implementation("io.opentelemetry:opentelemetry-extension-trace-propagators")
+//    implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
+//    implementation("io.micronaut.tracing:micronaut-tracing-core")
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
 
     implementation("io.github.resilience4j:resilience4j-kotlin:$resilience4jVersion")
@@ -76,7 +82,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.5.1")
     runtimeOnly("io.r2dbc:r2dbc-pool")
 
-    ktlint("com.pinterest:ktlint:0.47.1")
+    ktlint("com.pinterest:ktlint:0.48.0")
 
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("io.micronaut.test:micronaut-test-rest-assured")
