@@ -4,6 +4,10 @@ volumes:
   prometheus_data: {}
   grafana_data: {}
 
+networks:
+  app-network:
+    driver: bridge
+
 services:
   node-exporter:
     image: prom/node-exporter:latest
@@ -11,6 +15,8 @@ services:
     restart: unless-stopped
     expose:
       - 9100
+    networks:
+      - app-network
 
   prometheus:
     container_name: prometheus
@@ -61,15 +67,26 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: ces-example
+    networks:
+      - app-network
+
+  wiremock:
+    image:  wiremock/wiremock
+    ports:
+      - "8082:8080"
 
   app:
+    build: .
     image: ces-micronaut-example
     restart: always
     ports:
       - "8080:8080"
     links:
       - postgres
+      - wiremock
     environment:
-      R2DBC_DATASOURCES_DEFAULT_MAXSIZE: 500
+#      CLIENT_USER_API_BASE_URL: http://192.168.50.2:8082
       R2DBC_DATASOURCES_DEFAULT_URL: r2dbc:postgresql://postgres:5432/ces-example
       DATASOURCES_DEFAULT_URL: jdbc:postgresql://postgres:5432/ces-example
+    networks:
+      - app-network

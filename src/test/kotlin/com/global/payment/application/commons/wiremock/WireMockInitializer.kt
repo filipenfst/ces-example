@@ -1,13 +1,20 @@
 package com.global.payment.application.commons.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.global.payment.application.commons.conteiners.ContextInitializer
 
 object WireMockInitializer : ContextInitializer {
     private var startWireMock = false
 
-    val wireMock  = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort().dynamicHttpsPort())
+    val wireMock = WireMockServer(
+        WireMockConfiguration
+            .wireMockConfig()
+            .dynamicPort()
+            .dynamicHttpsPort()
+            .notifier(ConsoleNotifier(true))
+    )
 
     fun resetAll() {
         wireMock.resetAll()

@@ -1,6 +1,9 @@
 package com.global.payment.application.resource.subscription
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.global.payment.application.IntegrationTests
+import com.global.payment.application.commons.wiremock.WireMockInitializer
+import com.global.payment.application.commons.wiremock.withJsonResponseFile
 import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.application.gateway.r2dbc.entities.AppEntity
 import com.global.payment.application.gateway.r2dbc.entities.MerchantEntity
@@ -99,6 +102,38 @@ internal class SubscriptionControllerTest : IntegrationTests {
             .contentType(ContentType.JSON)
             .queryParam("appId", apps[1].applicationId)
             .`when`().get("/user/${users[0].id}/subscription")
+            .then()
+            .statusCode(200)
+            .body(
+                "isSubscribed", CoreMatchers.`is`(false)
+            )
+    }
+
+    @Test
+    fun `When user exist and dont have access to app it should return false`() {
+        val id = UUID.randomUUID().toString()
+        WireMockInitializer.wireMock.stubFor(
+            WireMock.get(WireMock.urlEqualTo("/user/$id"))
+                .withHeader("X-B3-TraceId", WireMock.containing("269736db4c032be3"))
+                .withHeader("X-B3-SpanId", WireMock.matching(".*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withJsonResponseFile("userResponse.json") {
+                            set("$.id", id)
+                        }
+                )
+        )
+        spec.given().request()
+            .accept(ContentType.JSON)
+            .headers(
+                "X-B3-TraceId", "269736db4c032be3",
+                "X-B3-SpanId", "b5c553dca8e73c90",
+                "X-B3-Sampled", "1",
+            )
+            .contentType(ContentType.JSON)
+            .queryParam("appId", apps[1].applicationId)
+            .`when`().get("/user/$id/subscription")
             .then()
             .statusCode(200)
             .body(

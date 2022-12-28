@@ -29,6 +29,16 @@ tracing:
   zipkin:
     enabled: true
 
+#otel:
+##  traces:
+##    exporter: zipkin
+#  propagators: b3multi
+##  instrumentation:
+##    log4j-mdc:
+##      enabled: false
+##    logback-appender:
+##      enabled: true
+
 jackson:
   date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
 
