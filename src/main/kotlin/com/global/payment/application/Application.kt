@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.info.Info
 import java.util.TimeZone
 
+
 @OpenAPIDefinition(
     info = Info(
         title = "CES Micronaut Example",
@@ -18,3 +19,5 @@ fun main(vararg args: String) {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     Micronaut.run(Application::class.java, *args)
 }
+
+

@@ -26,6 +26,7 @@ val jacksonVersion = "2.14.0"
 val wiremockVersion = "2.35.0"
 val mockkVersion = "1.13.2"
 val postgresqlVersion = "42.5.0"
+val debeziumVersion = "2.1.1.Final"
 val ktlint by configurations.creating
 
 dependencies {
@@ -77,6 +78,10 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("io.micronaut:micronaut-management")
+
+    implementation("io.debezium:debezium-api:$debeziumVersion")
+    implementation("io.debezium:debezium-embedded:$debeziumVersion")
+    implementation("io.debezium:debezium-connector-postgres:$debeziumVersion")
 
     runtimeOnly("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
     runtimeOnly("org.postgresql:postgresql:42.5.1")
