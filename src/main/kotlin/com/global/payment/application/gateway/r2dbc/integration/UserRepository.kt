@@ -6,44 +6,46 @@ import com.global.payment.application.gateway.r2dbc.entities.MERCHANT_TABLE_NAME
 import com.global.payment.application.gateway.r2dbc.entities.MERCHANT_USERS_TABLE_NAME
 import com.global.payment.application.gateway.r2dbc.entities.USER_TABLE_NAME
 import com.global.payment.application.gateway.r2dbc.entities.UserEntity
-import io.micronaut.data.annotation.Query
-import io.micronaut.data.model.query.builder.sql.Dialect
-import io.micronaut.data.r2dbc.annotation.R2dbcRepository
-import io.micronaut.data.repository.reactive.ReactiveStreamsCrudRepository
-import org.reactivestreams.Publisher
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Mono
 import java.util.UUID
-import javax.transaction.Transactional
 
-@R2dbcRepository(dialect = Dialect.POSTGRES)
-@Transactional(value = Transactional.TxType.MANDATORY)
-interface UserRepository : ReactiveStreamsCrudRepository<UserEntity, UUID> {
+@Repository
+@Transactional(propagation = Propagation.MANDATORY)
+interface UserRepository : ReactiveCrudRepository<UserEntity, Int> {
 
     @Query(
-            """
+        """
         SELECT u.* FROM $USER_TABLE_NAME u 
             INNER JOIN $MERCHANT_USERS_TABLE_NAME mu ON u.id = mu.user_id
             INNER JOIN $MERCHANT_TABLE_NAME m ON m.id = mu.merchant_id
             WHERE m.mid = :mid
             """
     )
-    fun findByMID(mid: String): Publisher<UserEntity>
+    fun findByMID(mid: String): Mono<UserEntity>
 
     @Query(
-            """
+        """
         SELECT EXISTS (SELECT u.* FROM $USER_TABLE_NAME u 
             INNER JOIN $MERCHANT_USERS_TABLE_NAME mu ON u.id = mu.user_id
             INNER JOIN $MERCHANT_SUBSCRIPTION_TABLE_NAME ms ON ms.merchant_id = mu.merchant_id
             INNER JOIN $APP_TABLE_NAME a ON a.id = ms.app_id
-            WHERE u.id = :userId AND a.application_id = :applicationId)::boolean
+            WHERE u.external_id = :userId AND a.application_id = :applicationId)::boolean
             """
     )
-    fun hasAccess(userId: UUID, applicationId: String): Publisher<Boolean>
+    fun hasAccess(userId: UUID, applicationId: String): Mono<Boolean>
 
     @Query(
-            """
+        """
             INSERT INTO $MERCHANT_USERS_TABLE_NAME (user_id, merchant_id)
             VALUES (:userId, :merchantId)
         """
     )
-    fun addUserToMerchant(userId: UUID, merchantId: UUID): Publisher<Long>
+    suspend fun addUserToMerchant(userId: Int, merchantId: Int)
+
+    suspend fun findByExternalId(externalId: UUID): UserEntity?
 }

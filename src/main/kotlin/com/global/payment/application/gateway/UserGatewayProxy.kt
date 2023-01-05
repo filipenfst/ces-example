@@ -4,14 +4,13 @@ import com.global.payment.application.gateway.httpclient.user.UserHttpClientGate
 import com.global.payment.application.gateway.r2dbc.UsersR2DBCGateway
 import com.global.payment.domain.user.entities.User
 import com.global.payment.domain.user.services.UserFinderPort
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import org.springframework.stereotype.Service
 import java.util.UUID
 
-@Singleton
+@Service
 class UserGatewayProxy(
-    @Inject private val userHttpClientGateway: UserHttpClientGateway,
-    @Inject private val usersR2DBCGateway: UsersR2DBCGateway,
+    private val userHttpClientGateway: UserHttpClientGateway,
+    private val usersR2DBCGateway: UsersR2DBCGateway,
 ) : UserFinderPort {
     override suspend fun findUser(id: UUID): User? {
         return usersR2DBCGateway.findUser(id) ?: userHttpClientGateway.findUser(id)

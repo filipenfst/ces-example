@@ -3,13 +3,13 @@ package com.global.payment.application.config
 import com.global.payment.application.gateway.UserGatewayProxy
 import com.global.payment.domain.user.services.UserAppAccessPort
 import com.global.payment.usecase.CheckUserAppAccessUseCase
-import io.micronaut.context.annotation.Factory
-import jakarta.inject.Singleton
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
 
-@Factory
+@Configuration
 class UseCaseFactory {
-    @Singleton
+    @Bean
     fun checkUserAppAccessUseCase(
         userAppAccessPort: UserAppAccessPort,
         userGatewayProxy: UserGatewayProxy,

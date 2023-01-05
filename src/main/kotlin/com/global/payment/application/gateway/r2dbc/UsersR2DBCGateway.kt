@@ -7,13 +7,12 @@ import com.global.payment.commons.logger.logInfo
 import com.global.payment.domain.user.entities.User
 import com.global.payment.domain.user.services.UserAppAccessPort
 import com.global.payment.domain.user.services.UserFinderPort
-import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.stereotype.Service
 import java.util.UUID
 
-@Singleton
+@Service
 class UsersR2DBCGateway(
     private val userRepository: UserRepository
 ) : UserAppAccessPort, UserFinderPort {
@@ -30,7 +29,7 @@ class UsersR2DBCGateway(
 
     override suspend fun findUser(id: UUID): User? {
         logInfo(msg = "Searching user on db by id: $id")
-        return userRepository.findById(id).awaitFirstOrNull()?.toDomain().also {
+        return userRepository.findByExternalId(id)?.toDomain().also {
             logInfo(msg = "User found: ${it != null}")
         }
     }

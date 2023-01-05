@@ -8,33 +8,34 @@ import com.global.payment.application.commons.wiremock.withJsonResponseFile
 import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.application.gateway.r2dbc.entities.AppEntity
 import com.global.payment.application.gateway.r2dbc.entities.MerchantEntity
+import com.global.payment.application.gateway.r2dbc.entities.UserEntity
 import com.global.payment.application.gateway.r2dbc.entities.toEntity
 import com.global.payment.application.gateway.r2dbc.integration.AppRepository
 import com.global.payment.application.gateway.r2dbc.integration.MerchantRepository
 import com.global.payment.application.gateway.r2dbc.integration.UserRepository
 import com.global.payment.domain.user.entities.User
-import jakarta.inject.Inject
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
 internal class UserGatewayProxyTest : IntegrationTests {
-    @Inject
+    @Autowired
     private lateinit var userRepository: UserRepository
 
-    @Inject
+    @Autowired
     private lateinit var merchantRepository: MerchantRepository
 
-    @Inject
+    @Autowired
     private lateinit var classUnderTest: UserGatewayProxy
 
-    @Inject
+    @Autowired
     private lateinit var appRepository: AppRepository
 
-    @Inject
+    @Autowired
     private lateinit var transactionDecorator: TransactionDecorator
 
 
@@ -46,14 +47,14 @@ internal class UserGatewayProxyTest : IntegrationTests {
     }
     private val apps = (1..2).map {
         AppEntity(
-            id = UUID.randomUUID(),
+            externalId = UUID.randomUUID(),
             applicationId = RandomStringUtils.randomAlphanumeric(10),
             name = RandomStringUtils.randomAlphanumeric(10)
         )
     }
 
     private val merchant = MerchantEntity(
-        id = UUID.randomUUID(),
+        externalId = UUID.randomUUID(),
         mid = RandomStringUtils.randomAlphanumeric(10),
         name = RandomStringUtils.randomAlphanumeric(10)
     )
@@ -61,21 +62,21 @@ internal class UserGatewayProxyTest : IntegrationTests {
     @BeforeEach
     fun setup(): Unit = runBlocking {
         transactionDecorator.withTransaction {
-            users.forEach {
+            val usersDB = users.map {
                 userRepository.save(it.toEntity()).awaitSingle()
             }
-            merchant.also {
+            val merchantDb = merchant.let {
                 merchantRepository.save(it).awaitSingle()
             }
 
-            userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
+            userRepository.addUserToMerchant(usersDB[1].id!!, merchantDb.id!!)
 
 
-            apps.forEach {
+            val appsDb = apps.map {
                 appRepository.save(it).awaitSingle()
             }
 
-            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
+            merchantRepository.addAppToMerchant(appId = appsDb[1].id!!, merchantId = merchantDb.id!!)
         }
     }
 
@@ -97,9 +98,9 @@ internal class UserGatewayProxyTest : IntegrationTests {
             )
 
             classUnderTest.findUser(id)
-                .assertThat().isEqualTo(
-                    User(
-                        id = id,
+                .assertThat().ignoringFields("id").isEqualTo(
+                    UserEntity(
+                        externalId = id,
                         name = "Name test"
                     )
                 )

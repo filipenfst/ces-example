@@ -1,8 +1,10 @@
 package com.global.payment.application
 
-import io.micronaut.runtime.Micronaut
 import io.swagger.v3.oas.annotations.OpenAPIDefinition
 import io.swagger.v3.oas.annotations.info.Info
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.runApplication
 import java.util.TimeZone
 
 
@@ -13,11 +15,11 @@ import java.util.TimeZone
         description = "",
     )
 )
-object Application
+@SpringBootApplication(scanBasePackages = ["com.global.payment.application"])
+@ConfigurationPropertiesScan
+class Application
 
 fun main(vararg args: String) {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    Micronaut.run(Application::class.java, *args)
+    runApplication<Application>(*args)
 }
-
-

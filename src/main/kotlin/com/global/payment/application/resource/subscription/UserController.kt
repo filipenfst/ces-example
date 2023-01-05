@@ -1,18 +1,20 @@
 package com.global.payment.application.resource.subscription
 
 import com.global.payment.commons.logger.logInfo
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.Header
-import io.micronaut.http.annotation.PathVariable
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Controller("/user/{userId}")
-open class UserController {
-    @Get
-    open suspend fun findUser(
+@RestController
+@RequestMapping("/user/{userId}")
+class UserController {
+    @GetMapping
+    suspend fun findUser(
         @PathVariable userId: UUID,
-        @Header("X-B3-TraceId") traceId:String
+        @RequestHeader("X-B3-TraceId") traceId: String
     ): UserResponse = UserResponse(
         id = userId,
         name = "Name-$userId"

@@ -9,30 +9,30 @@ import com.global.payment.application.gateway.r2dbc.integration.AppRepository
 import com.global.payment.application.gateway.r2dbc.integration.MerchantRepository
 import com.global.payment.application.gateway.r2dbc.integration.UserRepository
 import com.global.payment.domain.user.entities.User
-import jakarta.inject.Inject
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import reactor.util.context.Context
 import java.util.UUID
 
 internal class UsersR2DBCGatewayTest : IntegrationTests {
-    @Inject
+    @Autowired
     private lateinit var userRepository: UserRepository
 
-    @Inject
+    @Autowired
     private lateinit var merchantRepository: MerchantRepository
 
-    @Inject
+    @Autowired
     private lateinit var classUnderTest: UsersR2DBCGateway
 
-    @Inject
+    @Autowired
     private lateinit var appRepository: AppRepository
 
-    @Inject
+    @Autowired
     private lateinit var transactionDecorator: TransactionDecorator
 
 
@@ -44,14 +44,14 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
     }
     private val apps = (1..2).map {
         AppEntity(
-            id = UUID.randomUUID(),
+            externalId = UUID.randomUUID(),
             applicationId = RandomStringUtils.randomAlphanumeric(10),
             name = RandomStringUtils.randomAlphanumeric(10)
         )
     }
 
     private val merchant = MerchantEntity(
-        id = UUID.randomUUID(),
+        externalId = UUID.randomUUID(),
         mid = RandomStringUtils.randomAlphanumeric(10),
         name = RandomStringUtils.randomAlphanumeric(10)
     )
@@ -59,21 +59,21 @@ internal class UsersR2DBCGatewayTest : IntegrationTests {
     @BeforeEach
     fun setup(): Unit = runBlocking(ReactorContext(Context.empty())) {
         transactionDecorator.withTransaction {
-            users.forEach {
+            val usersDB = users.map {
                 userRepository.save(it.toEntity()).awaitSingle()
             }
-            merchant.also {
+            val merchantDb = merchant.let {
                 merchantRepository.save(it).awaitSingle()
             }
 
-            userRepository.addUserToMerchant(users[1].id, merchant.id).awaitSingle()
+            userRepository.addUserToMerchant(usersDB[1].id!!, merchantDb.id!!)
 
 
-            apps.forEach {
+            val appsDb = apps.map {
                 appRepository.save(it).awaitSingle()
             }
 
-            merchantRepository.addAppToMerchant(appId = apps[1].id, merchantId = merchant.id).awaitSingle()
+            merchantRepository.addAppToMerchant(appId = appsDb[1].id!!, merchantId = merchantDb.id!!)
         }
     }
 

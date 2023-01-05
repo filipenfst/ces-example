@@ -1,46 +1,29 @@
-micronaut:
+spring:
   application:
     name: cesMicronautExample
-  router:
-    static-resources:
-      swagger:
-        paths: classpath:META-INF/swagger
-        mapping: /swagger/**
-      swagger-ui:
-        paths: classpath:META-INF/swagger/views/swagger-ui
-        mapping: /swagger-ui/**
-  metrics:
+  r2dbc:
+    username: ${USERNAME_POSTGRES}
+    password: ${PASSWORD_POSTGRES}
+    pool:
+      initial-size: 5
+      max-size: 100
+      validation-query: SELECT 1
+    url: ${R2DBC_DATASOURCES_DEFAULT_URL}
+    properties:
+      schema: public
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: ${DATASOURCES_DEFAULT_URL}
+    username: root
+    password: root
+  liquibase:
     enabled: true
-    export:
-      prometheus:
-        enabled: true
-        step: PT1M
-        descriptions: true
-    binders:
-      jvm:
-        enabled: true
+    change-log: 'classpath:db/liquibase-changelog.xml'
 
-netty:
-  default:
-    allocator:
-      max-order: 3
-
-tracing:
-  zipkin:
-    enabled: true
-
-#otel:
-##  traces:
-##    exporter: zipkin
-#  propagators: b3multi
-##  instrumentation:
-##    log4j-mdc:
-##      enabled: false
-##    logback-appender:
-##      enabled: true
 
 jackson:
   date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+
 
 liquibase:
   enabled: true
@@ -77,11 +60,11 @@ endpoints:
 
 client:
   user-api:
-      base-url: http://localhost:8080
+    base-url: http://localhost:8576
+    response-timeout: 1000
+    connectionTimeout: 1000
 
-resilience4j:
-  circuitbreaker:
-    enabled: true
+resilience4j.circuitbreaker:
     instances:
       user-api:
         baseConfig: default

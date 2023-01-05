@@ -1,27 +1,27 @@
 package com.global.payment.application.resource.subscription
 
-import com.global.payment.application.gateway.r2dbc.TransactionDecorator
 import com.global.payment.commons.logger.logInfo
 import com.global.payment.usecase.CheckUserAppAccessUseCase
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.QueryValue
+import jakarta.validation.constraints.NotBlank
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
-import javax.validation.constraints.NotBlank
 
-@Controller("/user/{userId}/subscription")
-open class SubscriptionController(
+@RestController
+@RequestMapping("/user/{userId}/subscription")
+class SubscriptionController(
     private val checkUserAppAccessUseCase: CheckUserAppAccessUseCase,
-    private val transactionDecorator: TransactionDecorator,
 ) {
-    @Get
-    open suspend fun checkSubscriptionStatus(
+    @GetMapping
+    suspend fun checkSubscriptionStatus(
         @PathVariable userId: UUID,
-        @QueryValue @NotBlank appId: String
-    ): SubscriptionStatusResponse = transactionDecorator.withTransaction {
+        @RequestParam @NotBlank appId: String
+    ): SubscriptionStatusResponse {
         logInfo(msg = "Checking subscription status for user: $userId and app $appId")
-        SubscriptionStatusResponse(
+        return SubscriptionStatusResponse(
             isSubscribed = checkUserAppAccessUseCase.execute(userId, appId)
         ).also {
             logInfo(msg = "Returning: $it")

@@ -1,7 +1,7 @@
 package com.global.payment.application.commons
 
-import wiremock.com.jayway.jsonpath.DocumentContext
-import wiremock.com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.DocumentContext
+import com.jayway.jsonpath.JsonPath
 
 fun String.payload() = {}.javaClass.getResource("/__files/$this")!!.readText()
 

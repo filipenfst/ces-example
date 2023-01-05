@@ -1,34 +1,38 @@
 package com.global.payment.application.gateway.httpclient.user
 
-import com.global.payment.application.gateway.httpclient.config.ClientConfiguration
 import com.global.payment.application.gateway.httpclient.user.dto.UserResponse
 import com.global.payment.commons.logger.logInfo
 import com.global.payment.domain.user.entities.User
 import com.global.payment.domain.user.services.UserFinderPort
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.kotlin.circuitbreaker.executeSuspendFunction
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.client.annotation.Client
-import jakarta.inject.Named
-import jakarta.inject.Singleton
+import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import reactor.core.publisher.Mono
 import java.util.UUID
 
 
-@Singleton
+@Service
 class UserHttpClientGateway(
-    @Named("user-api") private val clientConfiguration: ClientConfiguration,
+//    private val clientConfiguration: UserApiConfiguration,
     private val userApiClient: UserApiClient,
+    circuitBreakerRegistry: CircuitBreakerRegistry,
 ) : UserFinderPort {
-    override suspend fun findUser(id: UUID): User? = clientConfiguration.circuitBreaker.executeSuspendFunction {
+
+    val circuitBreaker = circuitBreakerRegistry.circuitBreaker("user-api")
+    override suspend fun findUser(id: UUID): User? = circuitBreaker.executeSuspendFunction {
         logInfo(msg = "Searching user api for user: $id")
-        userApiClient.findUser(id.toString())?.toDomain().also {
+        userApiClient.findUser(id.toString()).awaitSingle()?.toDomain().also {
             logInfo(msg = "User found: ${it != null}")
         }
     }
 }
 
-@Client("\${client.user-api.base-url}")
+@HttpExchange
 interface UserApiClient {
-    @Get("/user/{id}")
-    suspend fun findUser(@PathVariable id: String): UserResponse?
+    @GetExchange("/user/{id}")
+    fun findUser(@PathVariable id: String): Mono<UserResponse?>
 }
