@@ -1,13 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("kapt") version "1.7.21"
-    kotlin("jvm") version "1.7.21"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.7.21"
+    kotlin("kapt") version "1.8.22"
+    kotlin("jvm") version "1.8.22"
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.8.22"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.6.7"
+    id("io.micronaut.application") version "4.0.0"
+    id("io.micronaut.test-resources") version "4.0.0"
+    id("io.micronaut.aot") version "4.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.21.0"
     jacoco
+
+
 }
 
 group = "com.global.payment"
@@ -19,9 +23,8 @@ repositories {
 }
 
 val testcontainersVersion = "1.17.6"
-val micronautDataVersionVersion = "3.9.1"
-val resilience4jVersion = "2.0.2"
-val coroutinesVersion = "1.6.4"
+val resilience4jVersion = "2.1.0"
+val coroutinesVersion = "1.7.2"
 val jacksonVersion = "2.14.0"
 val wiremockVersion = "2.35.0"
 val mockkVersion = "1.13.2"
@@ -32,6 +35,7 @@ val ktlint by configurations.creating
 dependencies {
     kapt("io.micronaut.data:micronaut-data-processor")
     kapt("io.micronaut:micronaut-inject-java")
+    kapt("io.micronaut.validation:micronaut-validation")
     kapt("io.micronaut:micronaut-http-validation")
     kapt("io.micronaut.openapi:micronaut-openapi")
     kapt("io.micronaut:micronaut-management")
@@ -43,10 +47,14 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut:micronaut-bom")
+//    implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut.kotlin:micronaut-kotlin-extension-functions")
-    implementation("io.micronaut.data:micronaut-data-r2dbc:$micronautDataVersionVersion")
+    implementation("io.micronaut.data:micronaut-data-r2dbc")
+//    implementation("io.micronaut.data:micronaut-data-jdbc:$micronautDataVersionVersion")
 
+//    implementation("io.micronaut.data:micronaut-data-spring:$micronautDataVersionVersion")
+//    implementation("org.springframework:spring-orm:6.0.3")
 
     implementation("io.micronaut.liquibase:micronaut-liquibase")
     implementation("org.slf4j:jul-to-slf4j:2.0.5")
@@ -54,12 +62,13 @@ dependencies {
 
     implementation("io.micronaut.serde:micronaut-serde-jackson")
 
-    implementation("io.micronaut.tracing:micronaut-tracing-zipkin")
-    implementation("io.micronaut.tracing:micronaut-tracing-opentelemetry-http")
+//    implementation("io.micronaut.tracing:micronaut-tracing-zipkin")
+//    implementation("io.micronaut.tracing:micronaut-tracing-opentelemetry-http")
+
+    implementation("io.micronaut.tracing:micronaut-tracing-brave-http")
+    implementation("io.micronaut.validation:micronaut-validation")
     implementation("io.opentelemetry:opentelemetry-extension-kotlin")
     implementation("io.opentelemetry:opentelemetry-extension-trace-propagators")
-//    implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
-//    implementation("io.micronaut.tracing:micronaut-tracing-core")
     implementation("io.micronaut.micrometer:micronaut-micrometer-registry-prometheus")
 
     implementation("io.github.resilience4j:resilience4j-kotlin:$resilience4jVersion")
@@ -73,7 +82,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion")
-    implementation("ch.qos.logback:logback-classic:1.4.5")
+    implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("org.slf4j:slf4j-simple")
     implementation("org.slf4j:slf4j-api")
     implementation("io.swagger.core.v3:swagger-annotations")
@@ -84,12 +93,13 @@ dependencies {
     implementation("io.debezium:debezium-connector-postgres:$debeziumVersion")
 
     runtimeOnly("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
-    runtimeOnly("org.postgresql:postgresql:42.5.1")
+    runtimeOnly("org.postgresql:postgresql:42.5.4")
     runtimeOnly("io.r2dbc:r2dbc-pool")
+    runtimeOnly("org.yaml:snakeyaml")
 
-    ktlint("com.pinterest:ktlint:0.48.0")
+    ktlint("com.pinterest:ktlint:0.48.2")
 
-    testImplementation("org.assertj:assertj-core:3.23.1")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("io.micronaut.test:micronaut-test-rest-assured")
     testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:$wiremockVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")

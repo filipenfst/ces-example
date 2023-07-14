@@ -24,13 +24,21 @@ CREATE TABLE merchant_users
 
 CREATE TABLE app
 (
-    id            UUID PRIMARY KEY,
+    id             UUID PRIMARY KEY,
     application_id VARCHAR(255) NOT NULL UNIQUE,
-    name          VARCHAR(255) NOT NULL
+    name           VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE merchants_subscriptions
 (
     app_id      UUID REFERENCES app (id),
     merchant_id UUID REFERENCES merchant (id)
+);
+
+
+CREATE TABLE record
+(
+    id             UUID PRIMARY KEY,
+    foo UUID NOT NULL,
+    bar           UUID NOT NULL
 );

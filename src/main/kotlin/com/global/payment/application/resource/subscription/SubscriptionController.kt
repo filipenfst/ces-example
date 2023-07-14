@@ -7,8 +7,8 @@ import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.QueryValue
+import jakarta.validation.constraints.NotBlank
 import java.util.UUID
-import javax.validation.constraints.NotBlank
 
 @Controller("/user/{userId}/subscription")
 open class SubscriptionController(

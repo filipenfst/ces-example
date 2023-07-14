@@ -10,12 +10,13 @@ import io.micronaut.data.annotation.Query
 import io.micronaut.data.model.query.builder.sql.Dialect
 import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.reactive.ReactiveStreamsCrudRepository
-import org.reactivestreams.Publisher
+import io.micronaut.transaction.TransactionDefinition
+import io.micronaut.transaction.annotation.Transactional
 import java.util.UUID
-import javax.transaction.Transactional
+import org.reactivestreams.Publisher
 
 @R2dbcRepository(dialect = Dialect.POSTGRES)
-@Transactional(value = Transactional.TxType.MANDATORY)
+@Transactional(propagation = TransactionDefinition.Propagation.MANDATORY)
 interface UserRepository : ReactiveStreamsCrudRepository<UserEntity, UUID> {
 
     @Query(
